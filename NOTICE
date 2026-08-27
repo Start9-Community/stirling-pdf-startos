@@ -1,3 +1,5 @@
-Stirling PDF v2.14.3 is pinned at upstream commit e556eba8326c8349aa0318034cfdb5c442dca21c.
-
-The upstream root LICENSE grants MIT terms for content outside its listed restricted directories. The official standard image includes proprietary components covered by the Stirling PDF User License at upstream-project/app/proprietary/LICENSE and the applicable upstream terms at https://www.stirlingpdf.com/terms.
+The upstream root LICENSE grants MIT terms for content outside the restricted
+directories it lists. The official image includes proprietary components covered
+by the Stirling PDF User License, published at
+https://www.stirlingpdf.com/terms and in `app/proprietary/LICENSE` of the
+upstream repository.

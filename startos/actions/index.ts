@@ -1,4 +1,4 @@
 import { sdk } from '../sdk'
-import { getAdminCredentials } from './getAdminCredentials'
+import { setAdminPassword } from './setAdminPassword'
 
-export const actions = sdk.Actions.of().addAction(getAdminCredentials)
+export const actions = sdk.Actions.of().addAction(setAdminPassword)

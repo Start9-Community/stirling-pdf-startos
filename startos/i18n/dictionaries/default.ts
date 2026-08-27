@@ -1,16 +1,21 @@
 export const DEFAULT_LANG = 'en_US'
 
 const dict = {
-  'Stirling PDF': 0,
-  'Stirling PDF is ready': 1,
-  'Stirling PDF is not ready': 2,
-  'The Stirling PDF web interface': 3,
-  'Get Admin Credentials': 4,
-  'Retrieve the generated Stirling PDF admin credentials': 5,
-  'Admin Credentials': 6,
-  'Use these credentials to sign in to Stirling PDF.': 7,
-  Username: 8,
-  Password: 9,
+  'Web Interface': 0,
+  'The Stirling PDF web interface': 1,
+  'The web interface is ready': 2,
+  'The web interface is not ready': 3,
+  'Set Admin Password': 4,
+  'Generate the password for the Stirling PDF admin account. Stirling PDF creates the account with it on its first start.': 5,
+  'Generate a new password for the Stirling PDF admin account and apply it.': 6,
+  'Every signed-in Stirling PDF session ends immediately.': 7,
+  'Stirling PDF Admin Password': 8,
+  'Save this password — it is shown once, and running this action again replaces it.': 9,
+  Username: 10,
+  Password: 11,
+  'Set the admin password before starting Stirling PDF.': 12,
+  'Stirling PDF rejected the saved password, so it cannot be changed from here. Change it from your account page inside Stirling PDF instead.': 13,
+  'Stirling PDF refused the new password.': 14,
 } as const
 
 export type I18nKey = keyof typeof dict

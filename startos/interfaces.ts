@@ -6,7 +6,7 @@ export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
   const uiMulti = sdk.MultiHost.of(effects, 'ui-multi')
   const uiMultiOrigin = await uiMulti.bindPort(uiPort, { protocol: 'http' })
   const ui = sdk.createInterface(effects, {
-    name: i18n('Stirling PDF'),
+    name: i18n('Web Interface'),
     id: 'ui',
     description: i18n('The Stirling PDF web interface'),
     type: 'ui',

@@ -1,25 +1,37 @@
 # Stirling PDF
 
-Stirling PDF is ready to use after you retrieve the automatically generated admin credentials.
+## Documentation
 
-## Open Stirling PDF
+- [Stirling PDF documentation](https://docs.stirlingpdf.com) — the upstream guide to every tool, the settings file, and the API.
 
-1. Open the **Dashboard** tab for Stirling PDF.
-2. Select the **Stirling PDF** interface.
-3. Sign in with the credentials from the **Get Admin Credentials** action.
+## What you get on StartOS
 
-## Admin credentials
+A single web interface with the whole Stirling PDF toolbox behind it — merge, split, rotate, compress, convert to and from Office and image formats, OCR scanned documents, fill and flatten forms, sign, redact, and chain any of it into a saved pipeline. Files are processed on your server and are not uploaded anywhere else.
 
-1. Open the **Actions** tab for Stirling PDF.
-2. Run **Get Admin Credentials**.
-3. Copy the username and password into the sign-in form.
+Your settings, OCR language data, and saved pipelines are kept on the server and are included in StartOS backups.
 
-The first username is `admin`. The displayed password was generated during installation and is not the upstream default password.
+Stirling PDF requires a sign-in, and this package generates the first account's password for you rather than leaving the instance open.
 
-## Persistent data and backups
+## Getting set up
 
-Stirling PDF settings, users, OCR language data, and pipelines are stored in the service volume and are included in StartOS backups. Application logs are not included in backups.
+1. Run **Set Admin Password** and copy the username and password it gives you. Stirling PDF will not start until you have done this, which is why it is the only thing you can press at first. **Save the password somewhere — it is shown once.**
+2. Start Stirling PDF and wait for it to become ready. The first start takes a minute or two.
+3. Open the **Web Interface** and sign in with those credentials.
 
-## Licensing
+## Using Stirling PDF
 
-The package includes upstream code under MIT terms and components under the Stirling PDF User License. See the package `LICENSE`, `NOTICE`, and upstream terms before production use.
+### Web interface
+
+Signing in lands you on the tool list. Pick a tool, upload one or more PDFs, and download the result. Nothing you upload is retained after the operation finishes unless you save it to a pipeline.
+
+Adding more users, and choosing what each of them may do, is done from **Settings → Admin** inside Stirling PDF.
+
+### OCR languages
+
+OCR needs a language pack for each language you want to recognise. Only English ships with the image. Add more from **Settings → OCR** inside Stirling PDF; they are stored on the server and survive restarts, updates, and restores.
+
+### Actions
+
+- **Set Admin Password** — generates a new password for the `admin` account and shows it once. Run it again whenever you want a fresh password or have lost the one you had; Stirling PDF applies the new one straight away and signs out anyone who is currently using it.
+
+  If you change the `admin` password from inside Stirling PDF instead, this action can no longer replace it — StartOS no longer knows the current one, and the action will tell you so. Use Stirling PDF's own account tools from then on.
