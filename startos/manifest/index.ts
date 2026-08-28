@@ -5,7 +5,7 @@ export const manifest = setupManifest({
   id: 'stirling-pdf',
   title: 'Stirling PDF',
   license: 'MIT AND LicenseRef-Stirling-PDF-User-License',
-  packageRepo: 'https://github.com/alextab93/stirling-pdf-startos',
+  packageRepo: 'https://github.com/Start9-Community/stirling-pdf-startos',
   upstreamRepo: 'https://github.com/Stirling-Tools/Stirling-PDF',
   marketingUrl: 'https://stirlingpdf.com',
   donationUrl: null,
