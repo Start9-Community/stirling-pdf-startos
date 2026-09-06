@@ -16,6 +16,8 @@ const dict = {
   'Set the admin password before starting Stirling PDF.': 12,
   'Stirling PDF rejected the saved password, so it cannot be changed from here. Change it from your account page inside Stirling PDF instead.': 13,
   'Stirling PDF refused the new password.': 14,
+  'Configure SMTP': 15,
+  'Let Stirling PDF send email through the StartOS system SMTP settings or a server of your own, which also lets admins invite users by email.': 16,
 } as const
 
 export type I18nKey = keyof typeof dict
