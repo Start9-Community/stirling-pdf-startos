@@ -1,3 +1,4 @@
+import { T } from '@start9labs/start-sdk'
 import { storeJson } from './fileModels/store.json'
 import { i18n } from './i18n'
 import { sdk } from './sdk'
@@ -7,6 +8,25 @@ export const main = sdk.setupMain(async ({ effects }) => {
   const store = await storeJson.read().const(effects)
   if (!store?.adminUsername || !store.adminPassword) {
     throw new Error('Admin credentials have not been set')
+  }
+
+  let mail: T.SmtpValue | null = null
+  if (store.smtp?.selection === 'system') {
+    mail = await sdk.getSystemSmtp(effects).const()
+    if (mail && store.smtp.value.customFrom) {
+      mail.from = store.smtp.value.customFrom
+    }
+  } else if (store.smtp?.selection === 'custom') {
+    const { host, from, username, password, security } =
+      store.smtp.value.provider.value
+    mail = {
+      host,
+      port: Number(security.value.port),
+      from,
+      username,
+      password: password ?? null,
+      security: security.selection,
+    }
   }
 
   const subcontainer = sdk.SubContainer.of(
@@ -63,6 +83,18 @@ export const main = sdk.setupMain(async ({ effects }) => {
         SPRINGDOC_SWAGGER_UI_ENABLED: 'false',
         MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: 'health',
         MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: 'never',
+        ...(mail && {
+          MAIL_ENABLED: 'true',
+          MAIL_ENABLEINVITES: 'true',
+          MAIL_HOST: mail.host,
+          MAIL_PORT: String(mail.port),
+          MAIL_USERNAME: mail.username,
+          MAIL_PASSWORD: mail.password ?? '',
+          MAIL_FROM: mail.from,
+          MAIL_STARTTLSENABLE: String(mail.security === 'starttls'),
+          MAIL_STARTTLSREQUIRED: String(mail.security === 'starttls'),
+          MAIL_SSLENABLE: String(mail.security === 'tls'),
+        }),
       },
     },
     ready: {

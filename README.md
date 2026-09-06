@@ -61,13 +61,13 @@ Everything the package keeps lives on a single `main` volume, mounted into the c
 
 The package owns one file, and it is StartOS-side state rather than upstream configuration.
 
-| Model        | File                      | Seeded                    | Rewritten                       |
-| ------------ | ------------------------- | ------------------------- | ------------------------------- |
-| `store.json` | `main:startos/store.json` | By **Set Admin Password** | By the same action, on rotation |
+| Model        | File                      | Seeded                    | Rewritten                                             |
+| ------------ | ------------------------- | ------------------------- | ----------------------------------------------------- |
+| `store.json` | `main:startos/store.json` | By **Set Admin Password** | By that action on rotation, and by **Configure SMTP** |
 
-It holds the username `admin` and the password the action last generated. Nothing else writes it, and init never mints a credential of its own — the action is the only source.
+It holds the username `admin`, the password **Set Admin Password** last generated, and the SMTP selection **Configure SMTP** last saved. Init never mints a credential of its own — the action is the only source.
 
-Stirling PDF's own configuration is not modelled. The package writes none of it: `/configs/settings.yml` is created by the application on first start and belongs to the user from then on, and a hand edit there survives every restart and update. The settings the package does assert are delivered as environment variables instead — see the quick reference for the list. Those are re-applied on every launch and always win over a matching key in `settings.yml`, with one exception: `SECURITY_INITIALLOGIN_USERNAME` and `SECURITY_INITIALLOGIN_PASSWORD` are consumed only by a start that finds the account database empty. That asymmetry is why **Set Admin Password** applies a later change through Stirling PDF's API rather than through the store — see [Actions](#actions).
+Stirling PDF's own configuration is not modelled. The package writes none of it: `/configs/settings.yml` is created by the application on first start and belongs to the user from then on, and a hand edit there survives every restart and update. The settings the package does assert are delivered as environment variables instead — see the quick reference for the list. Those are re-applied on every launch and always win over a matching key in `settings.yml`, with one exception: `SECURITY_INITIALLOGIN_USERNAME` and `SECURITY_INITIALLOGIN_PASSWORD` are consumed only by a start that finds the account database empty. That asymmetry is why **Set Admin Password** applies a later change through Stirling PDF's API rather than through the store — see [Actions](#actions). The `MAIL_*` variables are present only while **Configure SMTP** holds a selection other than Disabled; with it disabled the package asserts nothing about mail, and a hand-written `mail:` block in `settings.yml` applies.
 
 ## Dependencies
 
@@ -91,7 +91,7 @@ The action stores the password; the first start hands it to Stirling PDF through
 
 ## Actions
 
-One action, covering both the first credential and every later rotation.
+Two actions: one covering both the first credential and every later rotation, one for outbound email.
 
 ### Set Admin Password
 
@@ -107,6 +107,16 @@ A rotation authenticates as the admin with the password in `store.json` and call
 
 - **If the user changed their password inside Stirling PDF, rotation fails** with a message saying so. The store no longer holds the current password, and Stirling PDF's admin endpoint refuses to change the caller's own. Recovery is Stirling PDF's own account tooling, not this action.
 - **The password is shown once.** There is no action that reads it back — rotating is how a lost password is replaced.
+
+### Configure SMTP
+
+- **When to run it** — whenever Stirling PDF should be able to send email, which is what its user invitations need.
+- **What it changes** — stores the selection in `store.json`. Three choices: Disabled, the StartOS system SMTP settings (optionally with a different from-address), or a custom server using the SDK's provider presets.
+- **Cost** — restarts Stirling PDF, since the selection reaches it as environment variables at launch.
+- **Repeat safety** — safe to repeat; the form opens pre-filled with the current selection.
+- **Outputs** — none.
+
+Selecting the system settings while StartOS has none configured behaves as Disabled: no `MAIL_*` variable is set and Stirling PDF starts without mail. STARTTLS sets `MAIL_STARTTLSREQUIRED`, so a server that will not upgrade the connection is refused rather than spoken to in the clear; TLS sets `MAIL_SSLENABLE` for implicit TLS on the chosen port. Enabling mail also sets `MAIL_ENABLEINVITES`, which is what makes Stirling PDF's invite flow appear on its user-management page. The links it mails point at whichever of the service's addresses the admin was signed in on, so the package never has to know a public URL.
 
 ## Tasks
 
@@ -168,11 +178,23 @@ startos_managed_env_vars:
   - SPRINGDOC_SWAGGER_UI_ENABLED
   - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
   - MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS
+startos_managed_env_vars_while_smtp_configured:
+  - MAIL_ENABLED
+  - MAIL_ENABLEINVITES
+  - MAIL_HOST
+  - MAIL_PORT
+  - MAIL_USERNAME
+  - MAIL_PASSWORD
+  - MAIL_FROM
+  - MAIL_STARTTLSENABLE
+  - MAIL_STARTTLSREQUIRED
+  - MAIL_SSLENABLE
 dependencies: none
 interfaces:
   ui: { type: ui, port: 8080 }
 actions:
   - set-admin-password
+  - manage-smtp
 tasks:
   - { action: set-admin-password, severity: critical }
 health_checks:

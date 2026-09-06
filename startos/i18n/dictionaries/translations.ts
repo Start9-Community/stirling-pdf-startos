@@ -17,6 +17,8 @@ export default {
     12: 'Establece la contraseña de administrador antes de iniciar Stirling PDF.',
     13: 'Stirling PDF rechazó la contraseña guardada, así que no se puede cambiar desde aquí. Cámbiala desde tu página de cuenta dentro de Stirling PDF.',
     14: 'Stirling PDF rechazó la contraseña nueva.',
+    15: 'Configurar SMTP',
+    16: 'Permite que Stirling PDF envíe correo a través de la configuración SMTP del sistema StartOS o de un servidor propio, lo que también permite a los administradores invitar usuarios por correo.',
   },
   de_DE: {
     0: 'Weboberfläche',
@@ -34,6 +36,8 @@ export default {
     12: 'Lege das Administratorpasswort fest, bevor du Stirling PDF startest.',
     13: 'Stirling PDF hat das gespeicherte Passwort abgelehnt, daher kann es hier nicht geändert werden. Ändere es auf deiner Kontoseite in Stirling PDF.',
     14: 'Stirling PDF hat das neue Passwort abgelehnt.',
+    15: 'SMTP konfigurieren',
+    16: 'Lässt Stirling PDF E-Mails über die SMTP-Einstellungen des StartOS-Systems oder einen eigenen Server senden, womit Administratoren auch Benutzer per E-Mail einladen können.',
   },
   pl_PL: {
     0: 'Interfejs webowy',
@@ -51,6 +55,8 @@ export default {
     12: 'Ustaw hasło administratora przed uruchomieniem Stirling PDF.',
     13: 'Stirling PDF odrzucił zapisane hasło, więc nie można go tu zmienić. Zmień je na stronie swojego konta w Stirling PDF.',
     14: 'Stirling PDF odrzucił nowe hasło.',
+    15: 'Skonfiguruj SMTP',
+    16: 'Pozwala Stirling PDF wysyłać pocztę przez systemowe ustawienia SMTP StartOS lub własny serwer, dzięki czemu administratorzy mogą też zapraszać użytkowników e-mailem.',
   },
   fr_FR: {
     0: 'Interface web',
@@ -68,5 +74,7 @@ export default {
     12: "Définissez le mot de passe d'administration avant de démarrer Stirling PDF.",
     13: 'Stirling PDF a rejeté le mot de passe enregistré ; il ne peut donc pas être changé ici. Changez-le depuis la page de votre compte dans Stirling PDF.',
     14: 'Stirling PDF a refusé le nouveau mot de passe.',
+    15: 'Configurer SMTP',
+    16: 'Permet à Stirling PDF d’envoyer des e-mails via les réglages SMTP du système StartOS ou votre propre serveur, ce qui permet aussi aux administrateurs d’inviter des utilisateurs par e-mail.',
   },
 } satisfies Record<string, LangDict>

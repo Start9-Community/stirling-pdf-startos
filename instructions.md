@@ -26,6 +26,10 @@ Signing in lands you on the tool list. Pick a tool, upload one or more PDFs, and
 
 Adding more users, and choosing what each of them may do, is done from **Settings → Admin** inside Stirling PDF.
 
+### Inviting users by email
+
+Run **Configure SMTP** first: choose the SMTP settings already configured under **System → SMTP** in StartOS, or enter a server of your own. Stirling PDF restarts, and its user-management page gains an invite option that emails each new user a link to set their own password. The link points at the address you were signed in on when you sent it, so send invitations from the address your users will reach Stirling PDF on.
+
 ### OCR languages
 
 OCR needs a language pack for each language you want to recognise. Only English ships with the image. Add more from **Settings → OCR** inside Stirling PDF; they are stored on the server and survive restarts, updates, and restores.
@@ -35,3 +39,4 @@ OCR needs a language pack for each language you want to recognise. Only English 
 - **Set Admin Password** — generates a new password for the `admin` account and shows it once. Run it again whenever you want a fresh password or have lost the one you had; Stirling PDF applies the new one straight away and signs out anyone who is currently using it.
 
   If you change the `admin` password from inside Stirling PDF instead, this action can no longer replace it — StartOS no longer knows the current one, and the action will tell you so. Use Stirling PDF's own account tools from then on.
+- **Configure SMTP** — chooses how Stirling PDF sends email: not at all, through the StartOS system SMTP settings, or through a server you enter here. Saving restarts Stirling PDF.
