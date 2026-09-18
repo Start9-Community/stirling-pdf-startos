@@ -46,20 +46,23 @@ StartOS runs its own init as PID 1 inside the subcontainer, so tini never is. Th
 
 ## Volume and Data Layout
 
-Everything the package keeps lives on a single `main` volume, mounted into the container as five separate paths so that logs can be excluded from backups.
+Everything the package keeps lives on a single `main` volume, mounted into the container as six separate paths so that logs can be excluded from backups.
 
-| Volume path          | Mount point                           | Contents                                            |
-| -------------------- | ------------------------------------- | --------------------------------------------------- |
-| `configs/`           | `/configs`                            | Application settings and the account database       |
-| `tessdata/`          | `/usr/share/tesseract-ocr/5/tessdata` | OCR language data                                   |
-| `pipeline/`          | `/pipeline`                           | Saved pipeline definitions and watched-folder state |
-| `logs/`              | `/logs`                               | Application logs                                    |
-| `customFiles/`       | `/customFiles`                        | Replacement static assets and templates             |
-| `startos/store.json` | not mounted                           | The generated administrator password                |
+| Volume path          | Mount point                           | Contents                                                 |
+| -------------------- | ------------------------------------- | -------------------------------------------------------- |
+| `configs/`           | `/configs`                            | Application settings and the account database            |
+| `tessdata/`          | `/usr/share/tesseract-ocr/5/tessdata` | OCR language data                                        |
+| `pipeline/`          | `/pipeline`                           | Saved pipeline definitions and watched-folder state      |
+| `logs/`              | `/logs`                               | Application logs                                         |
+| `customFiles/`       | `/customFiles`                        | Replacement static assets and templates                  |
+| `storage/`           | `/storage`                            | Files users keep on the server, once that is switched on |
+| `startos/store.json` | not mounted                           | The generated administrator password                     |
 
 `startos/store.json` is deliberately outside every mount point, so Stirling PDF cannot read it.
 
 `tessdata/` is mounted over the one directory Tesseract reads — upstream's `init.sh` pins `TESSDATA_PREFIX` to it — rather than at `/usr/share/tessdata`, the drop-in path upstream documents for Docker. That is what lets a language downloaded from Stirling PDF's **Advanced** settings work at once and persist: in the stock image that directory is root-owned, so the download is refused, and it would not outlive the container anyway. Mounting over it hides the languages the image ships, so the `tessdata-seed` oneshot copies those into the volume before every start and gives the directory to the user Stirling PDF runs as. The copy only replaces a file when the image's is newer, so a language the image updates reaches existing installs, while a downloaded language, or a shipped one the user has replaced by hand, is left alone.
+
+`storage/` backs upstream's server file storage, which is off until the **Enable Server File Storage** action switches it on — see [Actions](#actions). Until then the file manager's **My Files** holds files in the user's browser only, per device, and nothing reaches the server. Once it is on, each file is written to `storage/<user id>/<uuid>_<name>`, while folders, names and shares are rows in the account database under `configs/` — the directory is not browsable as the user sees it, and a file added or removed there by hand is invisible to, or breaks, **My Files**.
 
 If OCR stops offering a language that was downloaded, check the **Tessdata Directory** field in those settings: it must be empty. A path there sends both the language list and new downloads somewhere Tesseract does not read and the volume does not cover.
 
@@ -67,11 +70,11 @@ If OCR stops offering a language that was downloaded, check the **Tessdata Direc
 
 The package owns one file, and it is StartOS-side state rather than upstream configuration.
 
-| Model        | File                      | Seeded                    | Rewritten                                             |
-| ------------ | ------------------------- | ------------------------- | ----------------------------------------------------- |
-| `store.json` | `main:startos/store.json` | By **Set Admin Password** | By that action on rotation, and by **Configure SMTP** |
+| Model        | File                      | Seeded                    | Rewritten                                                                                |
+| ------------ | ------------------------- | ------------------------- | ---------------------------------------------------------------------------------------- |
+| `store.json` | `main:startos/store.json` | By **Set Admin Password** | By that action on rotation, by **Configure SMTP**, and by the server file storage toggle |
 
-It holds the username `admin`, the password **Set Admin Password** last generated, and the SMTP selection **Configure SMTP** last saved. Init never mints a credential of its own — the action is the only source.
+It holds the username `admin`, the password **Set Admin Password** last generated, the SMTP selection **Configure SMTP** last saved, and whether server file storage is on. Init never mints a credential of its own — the action is the only source.
 
 Stirling PDF's own configuration is not modelled. The package writes none of it: `/configs/settings.yml` is created by the application on first start and belongs to the user from then on, and a hand edit there survives every restart and update. The settings the package does assert are delivered as environment variables instead — see the quick reference for the list. Those are re-applied on every launch and always win over a matching key in `settings.yml`, with one exception: `SECURITY_INITIALLOGIN_USERNAME` and `SECURITY_INITIALLOGIN_PASSWORD` are consumed only by a start that finds the account database empty. That asymmetry is why **Set Admin Password** applies a later change through Stirling PDF's API rather than through the store — see [Actions](#actions). The `MAIL_*` variables are present only while **Configure SMTP** holds a selection other than Disabled; with it disabled the package asserts nothing about mail, and a hand-written `mail:` block in `settings.yml` applies.
 
@@ -91,13 +94,13 @@ The interactive API documentation upstream serves at `/swagger-ui` is disabled; 
 
 ## Installation and First-Run Flow
 
-Install creates the five data directories and raises a `critical` task pointing at **Set Admin Password**. No credential exists until the user runs it, and the task blocks startup until they do — so the password is minted and shown before the service that will consume it ever comes up.
+Install creates the six data directories and raises a `critical` task pointing at **Set Admin Password**. No credential exists until the user runs it, and the task blocks startup until they do — so the password is minted and shown before the service that will consume it ever comes up.
 
 The action stores the password; the first start hands it to Stirling PDF through `SECURITY_INITIALLOGIN_*`, which creates the account. Beyond that the first launch is upstream's own — Stirling PDF creates `/configs/settings.yml` and its account database.
 
 ## Actions
 
-Two actions: one covering both the first credential and every later rotation, one for outbound email.
+Three actions: one covering both the first credential and every later rotation, one for outbound email, and one switching server file storage on and off.
 
 ### Set Admin Password
 
@@ -124,6 +127,18 @@ A rotation authenticates as the admin with the password in `store.json` and call
 
 Selecting the system settings while StartOS has none configured behaves as Disabled: no `MAIL_*` variable is set and Stirling PDF starts without mail. STARTTLS sets `MAIL_STARTTLSREQUIRED`, so a server that will not upgrade the connection is refused rather than spoken to in the clear; TLS sets `MAIL_SSLENABLE` for implicit TLS on the chosen port. Enabling mail also sets `MAIL_ENABLEINVITES`, which is what makes Stirling PDF's invite flow appear on its user-management page. The links it mails point at whichever of the service's addresses the admin was signed in on, so the package never has to know a public URL.
 
+### Enable / Disable Server File Storage
+
+One action whose name shows what running it will do, so it also reports the current state.
+
+- **When to run it** — when users want the files in **My Files** to follow them between devices. Off, which is the default, **My Files** keeps files in the browser they were added in and nothing reaches the server.
+- **What it changes** — flips `serverFileStorage` in `store.json`, which reaches Stirling PDF as `STORAGE_ENABLED`. Nothing in `storage/` is touched: switching it off leaves every stored file and its database rows in place, unreachable until it is switched on again.
+- **Cost** — restarts Stirling PDF if it is running; while stopped it simply applies on the next start. It needs nothing from the application, so it works before Stirling PDF has ever been started.
+- **Repeat safety** — each run is the opposite of the last. Check the name before running it.
+- **Outputs** — none.
+
+`STORAGE_ENABLED` is asserted on every launch, so the **Enable Server File Storage** switch under **File Storage & Sharing** inside Stirling PDF does not stick: whatever it is set to, the next start restores the action's choice. The other switches on that page, sharing among them, are left to the admin.
+
 ## Tasks
 
 One task, raised at install.
@@ -148,7 +163,7 @@ Stirling PDF is a Spring Boot application and its cold start is slow — a minut
 
 The strategy is a straight volume copy: `main` is rsynced wholesale, with `logs` and `configs/heap_dumps` excluded.
 
-That captures the account database, `settings.yml`, saved pipelines, OCR language data, and the generated credentials in `store.json`. Logs are excluded because they are large and rebuild themselves. `configs/heap_dumps/` is where upstream's JVM options write a heap dump if Stirling PDF runs out of memory; a dump can be several gigabytes and nothing reads it back, so it is diagnostic material that stays on the server.
+That captures the account database, `settings.yml`, saved pipelines, OCR language data, every file users have stored on the server, and the generated credentials in `store.json`. Stored files and the database rows that index them are backed up together, so a restore brings back **My Files** intact; the `storage.quotas` keys in `settings.yml` are the way to bound how large that gets, since the settings page does not expose them. Logs are excluded because they are large and rebuild themselves. `configs/heap_dumps/` is where upstream's JVM options write a heap dump if Stirling PDF runs out of memory; a dump can be several gigabytes and nothing reads it back, so it is diagnostic material that stays on the server.
 
 A restored instance is immediately usable and needs nothing re-entered — the account database comes back with it, so the credentials that worked before the backup still work.
 
@@ -159,7 +174,9 @@ A restored instance is immediately usable and needs nothing re-entered — the a
 3. **The Swagger UI and the OpenAPI document are disabled.** The REST API is unaffected; only the interactive documentation pages are gone.
 4. **Login cannot be disabled.** `SECURITY_ENABLELOGIN` is re-asserted on every launch, so the anonymous single-user mode upstream offers is not reachable.
 5. **A password changed inside Stirling PDF cannot be rotated from StartOS again** — see [Actions](#actions).
-6. **`/usr/share/tessdata` is not a drop-in directory for OCR languages.** Upstream's Docker instructions for adding a language by hand do not apply; languages are added from the **Advanced** settings instead — see [Volume and Data Layout](#volume-and-data-layout).
+6. **Server file storage is switched from StartOS, not from inside Stirling PDF** — see [Actions](#actions).
+7. **Share links need an address the package cannot supply.** Upstream only issues them once `system.frontendUrl` is set, and a StartOS service has no single address — the admin has to enter the one their users reach Stirling PDF on. Sharing a stored file with a named user needs no such setting.
+8. **`/usr/share/tessdata` is not a drop-in directory for OCR languages.** Upstream's Docker instructions for adding a language by hand do not apply; languages are added from the **Advanced** settings instead — see [Volume and Data Layout](#volume-and-data-layout).
 
 ## Quick Reference for AI Consumers
 
@@ -169,7 +186,7 @@ image: stirlingtools/stirling-pdf
 architectures: [x86_64, aarch64]
 subcontainers: [stirling-pdf, tessdata-seed]
 volumes:
-  main: /configs, /usr/share/tesseract-ocr/5/tessdata, /pipeline, /logs, /customFiles
+  main: /configs, /usr/share/tesseract-ocr/5/tessdata, /pipeline, /logs, /customFiles, /storage
 file_models:
   - startos/store.json
 startos_managed_env_vars:
@@ -178,6 +195,7 @@ startos_managed_env_vars:
   - SECURITY_ENABLELOGIN
   - SECURITY_INITIALLOGIN_USERNAME
   - SECURITY_INITIALLOGIN_PASSWORD
+  - STORAGE_ENABLED
   - SYSTEM_GOOGLEVISIBILITY
   - SYSTEM_ENABLEANALYTICS
   - SHOW_SURVEY
@@ -203,6 +221,7 @@ interfaces:
 actions:
   - set-admin-password
   - manage-smtp
+  - server-file-storage
 tasks:
   - { action: set-admin-password, severity: critical }
 health_checks:

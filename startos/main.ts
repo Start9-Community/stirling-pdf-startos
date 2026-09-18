@@ -62,6 +62,12 @@ export const main = sdk.setupMain(async ({ effects }) => {
         subpath: 'customFiles',
         mountpoint: '/customFiles',
         readonly: false,
+      })
+      .mountVolume({
+        volumeId: 'main',
+        subpath: 'storage',
+        mountpoint: '/storage',
+        readonly: false,
       }),
     'stirling-pdf',
   )
@@ -108,6 +114,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
           SECURITY_ENABLELOGIN: 'true',
           SECURITY_INITIALLOGIN_USERNAME: store.adminUsername,
           SECURITY_INITIALLOGIN_PASSWORD: store.adminPassword,
+          STORAGE_ENABLED: String(store.serverFileStorage),
           SYSTEM_GOOGLEVISIBILITY: 'false',
           SYSTEM_ENABLEANALYTICS: 'false',
           SHOW_SURVEY: 'false',
