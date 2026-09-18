@@ -1,18 +1,38 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '2.14.3:2',
+  version: '2.14.3:3',
   releaseNotes: {
-    en_US:
-      'Adds the Configure SMTP action. Stirling PDF can send email through the StartOS system SMTP settings or a server of your own, and admins can invite users by email.',
-    es_ES:
-      'Añade la acción Configurar SMTP. Stirling PDF puede enviar correo a través de la configuración SMTP del sistema StartOS o de un servidor propio, y los administradores pueden invitar usuarios por correo.',
-    de_DE:
-      'Fügt die Aktion SMTP konfigurieren hinzu. Stirling PDF kann E-Mails über die SMTP-Einstellungen des StartOS-Systems oder einen eigenen Server senden, und Administratoren können Benutzer per E-Mail einladen.',
-    pl_PL:
-      'Dodaje akcję Skonfiguruj SMTP. Stirling PDF może wysyłać pocztę przez systemowe ustawienia SMTP StartOS lub własny serwer, a administratorzy mogą zapraszać użytkowników e-mailem.',
-    fr_FR:
-      'Ajoute l’action Configurer SMTP. Stirling PDF peut envoyer des e-mails via les réglages SMTP du système StartOS ou un serveur personnalisé, et les administrateurs peuvent inviter des utilisateurs par e-mail.',
+    en_US: `- New action: Enable Server File Storage. It lets users keep the files in My Files on the server and open them from any device. Stored files live on the service's volume and are included in backups; before, they were lost at every restart. It is off by default, and the switch of the same name inside Stirling PDF no longer sticks — use the action.
+- OCR languages can now be added from the Advanced settings inside Stirling PDF. Downloads were refused before; they now work and survive restarts, updates and restores.
+- Stirling PDF's memory use is now capped at a 3 GB Java heap. Before, it was allowed up to half of the server's RAM, which could starve other services.
+- Backups no longer include the memory dumps Stirling PDF writes if it runs out of memory, which can be several gigabytes each.
+- Finished converter processes are now cleaned up properly, which removes a warning from the start of the logs.
+- The instructions now list the OCR languages that are included, and mention the five-user limit of the free tier and that invited users sign in with their email address.`,
+    es_ES: `- Nueva acción: Activar el almacenamiento de archivos en el servidor. Permite a los usuarios guardar los archivos de My Files en el servidor y abrirlos desde cualquier dispositivo. Los archivos almacenados residen en el volumen del servicio y se incluyen en las copias de seguridad; antes se perdían en cada reinicio. Está desactivada por defecto, y el interruptor del mismo nombre dentro de Stirling PDF ya no se conserva: usa la acción.
+- Ahora se pueden añadir idiomas de OCR desde los ajustes avanzados de Stirling PDF. Antes las descargas se rechazaban; ahora funcionan y sobreviven a reinicios, actualizaciones y restauraciones.
+- El uso de memoria de Stirling PDF ahora está limitado a un heap de Java de 3 GB. Antes se le permitía hasta la mitad de la RAM del servidor, lo que podía dejar sin memoria a otros servicios.
+- Las copias de seguridad ya no incluyen los volcados de memoria que Stirling PDF escribe si se queda sin memoria, que pueden ocupar varios gigabytes cada uno.
+- Los procesos de conversión terminados ahora se limpian correctamente, lo que elimina una advertencia al inicio de los registros.
+- Las instrucciones ahora enumeran los idiomas de OCR incluidos y mencionan el límite de cinco usuarios del nivel gratuito y que los usuarios invitados inician sesión con su dirección de correo.`,
+    de_DE: `- Neue Aktion: Dateispeicherung auf dem Server aktivieren. Damit können Benutzer die Dateien aus My Files auf dem Server ablegen und von jedem Gerät aus öffnen. Gespeicherte Dateien liegen auf dem Volume des Dienstes und sind in Backups enthalten; bisher gingen sie bei jedem Neustart verloren. Standardmäßig ist sie aus, und der gleichnamige Schalter in Stirling PDF bleibt nicht mehr erhalten – nutze die Aktion.
+- OCR-Sprachen lassen sich jetzt in den erweiterten Einstellungen von Stirling PDF hinzufügen. Downloads wurden bisher abgelehnt; jetzt funktionieren sie und überstehen Neustarts, Updates und Wiederherstellungen.
+- Der Speicherverbrauch von Stirling PDF ist jetzt auf einen Java-Heap von 3 GB begrenzt. Bisher durfte er bis zur Hälfte des Arbeitsspeichers des Servers belegen, was anderen Diensten den Speicher nehmen konnte.
+- Backups enthalten nicht mehr die Speicherabbilder, die Stirling PDF schreibt, wenn ihm der Arbeitsspeicher ausgeht, und die jeweils mehrere Gigabyte groß sein können.
+- Beendete Konvertierungsprozesse werden jetzt korrekt aufgeräumt, wodurch eine Warnung am Anfang der Protokolle entfällt.
+- Die Anleitung nennt jetzt die enthaltenen OCR-Sprachen und erwähnt das Limit von fünf Benutzern in der kostenlosen Stufe sowie dass sich eingeladene Benutzer mit ihrer E-Mail-Adresse anmelden.`,
+    pl_PL: `- Nowa akcja: Włącz przechowywanie plików na serwerze. Pozwala użytkownikom trzymać pliki z My Files na serwerze i otwierać je z dowolnego urządzenia. Zapisane pliki znajdują się na wolumenie usługi i są uwzględniane w kopiach zapasowych; wcześniej przepadały przy każdym restarcie. Domyślnie jest wyłączona, a przełącznik o tej samej nazwie w Stirling PDF nie jest już zapamiętywany — użyj akcji.
+- Języki OCR można teraz dodawać w ustawieniach zaawansowanych Stirling PDF. Wcześniej pobieranie było odrzucane; teraz działa, a pobrane języki przetrwają restarty, aktualizacje i przywracanie.
+- Zużycie pamięci przez Stirling PDF jest teraz ograniczone do 3 GB sterty Javy. Wcześniej mógł zająć nawet połowę pamięci RAM serwera, co mogło zabierać pamięć innym usługom.
+- Kopie zapasowe nie zawierają już zrzutów pamięci, które Stirling PDF zapisuje, gdy zabraknie mu pamięci, a które mogą zajmować po kilka gigabajtów.
+- Zakończone procesy konwersji są teraz poprawnie sprzątane, co usuwa ostrzeżenie z początku logów.
+- Instrukcja wymienia teraz dołączone języki OCR oraz wspomina o limicie pięciu użytkowników w darmowym planie i o tym, że zaproszeni użytkownicy logują się swoim adresem e-mail.`,
+    fr_FR: `- Nouvelle action : Activer le stockage de fichiers sur le serveur. Elle permet aux utilisateurs de conserver les fichiers de My Files sur le serveur et de les ouvrir depuis n’importe quel appareil. Les fichiers stockés résident sur le volume du service et sont inclus dans les sauvegardes ; auparavant, ils étaient perdus à chaque redémarrage. Elle est désactivée par défaut, et l’interrupteur du même nom dans Stirling PDF n’est plus conservé : utilisez l’action.
+- Les langues d’OCR peuvent désormais être ajoutées depuis les paramètres avancés de Stirling PDF. Les téléchargements étaient refusés auparavant ; ils fonctionnent maintenant et survivent aux redémarrages, mises à jour et restaurations.
+- L’utilisation mémoire de Stirling PDF est désormais plafonnée à un tas Java de 3 Go. Auparavant, il pouvait occuper jusqu’à la moitié de la RAM du serveur, au risque de priver de mémoire les autres services.
+- Les sauvegardes n’incluent plus les vidages mémoire que Stirling PDF écrit lorsqu’il manque de mémoire, et qui peuvent peser plusieurs gigaoctets chacun.
+- Les processus de conversion terminés sont désormais correctement nettoyés, ce qui supprime un avertissement au début des journaux.
+- Les instructions énumèrent désormais les langues d’OCR incluses et mentionnent la limite de cinq utilisateurs de l’offre gratuite ainsi que le fait que les utilisateurs invités se connectent avec leur adresse e-mail.`,
   },
   migrations: {
     up: async () => {},
