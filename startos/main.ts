@@ -110,6 +110,10 @@ export const main = sdk.setupMain(async ({ effects }) => {
           // StartOS runs its own PID 1 in the subcontainer, so tini must
           // register as a subreaper to reap the converters Stirling PDF spawns.
           TINI_SUBREAPER: '1',
+          // StartOS sets no memory limit, so upstream's init would size the heap
+          // from the whole host: half its RAM. This is about what it picks for
+          // the 4 GB container its docs recommend for a small team.
+          JAVA_CUSTOM_OPTS: '-Xms512m -Xmx3g',
           DISABLE_ADDITIONAL_FEATURES: 'false',
           SECURITY_ENABLELOGIN: 'true',
           SECURITY_INITIALLOGIN_USERNAME: store.adminUsername,

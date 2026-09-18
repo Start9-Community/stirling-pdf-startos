@@ -42,6 +42,8 @@ The package runs the official Stirling PDF "standard" image unmodified — no Do
 
 One subcontainer runs, named `stirling-pdf`. Attach to it with `start-cli package attach stirling-pdf -n stirling-pdf`. A second, `tessdata-seed`, is where a oneshot prepares the OCR language data before each start — see [Volume and Data Layout](#volume-and-data-layout). It stays up alongside the first, but nothing runs in it once that copy has finished.
 
+The Java heap is capped at 3 GB through `JAVA_CUSTOM_OPTS`. Upstream's `init.sh` sizes the heap from the memory limit of its container, and StartOS sets none, so it would otherwise read the whole host's RAM and allow half of it — 16 GB on a 32 GB server. 3 GB is about what that script picks inside the 4 GB container upstream recommends for up to ten users. A job that needs more fails with an out-of-memory error, which makes the JVM exit and the service restart; the dump it leaves is in `configs/heap_dumps/`, outside backups.
+
 StartOS runs its own init as PID 1 inside the subcontainer, so tini never is. The package sets `TINI_SUBREAPER` so that tini still adopts and reaps the converter processes Stirling PDF spawns — LibreOffice, OCRmyPDF, Ghostscript, Calibre — instead of leaving them as zombies.
 
 ## Volume and Data Layout
@@ -174,9 +176,10 @@ A restored instance is immediately usable and needs nothing re-entered — the a
 3. **The Swagger UI and the OpenAPI document are disabled.** The REST API is unaffected; only the interactive documentation pages are gone.
 4. **Login cannot be disabled.** `SECURITY_ENABLELOGIN` is re-asserted on every launch, so the anonymous single-user mode upstream offers is not reachable.
 5. **A password changed inside Stirling PDF cannot be rotated from StartOS again** — see [Actions](#actions).
-6. **Server file storage is switched from StartOS, not from inside Stirling PDF** — see [Actions](#actions).
-7. **Share links need an address the package cannot supply.** Upstream only issues them once `system.frontendUrl` is set, and a StartOS service has no single address — the admin has to enter the one their users reach Stirling PDF on. Sharing a stored file with a named user needs no such setting.
-8. **`/usr/share/tessdata` is not a drop-in directory for OCR languages.** Upstream's Docker instructions for adding a language by hand do not apply; languages are added from the **Advanced** settings instead — see [Volume and Data Layout](#volume-and-data-layout).
+6. **The Java heap is capped at 3 GB** rather than sized from the host's memory — see [Image and Container Runtime](#image-and-container-runtime).
+7. **Server file storage is switched from StartOS, not from inside Stirling PDF** — see [Actions](#actions).
+8. **Share links need an address the package cannot supply.** Upstream only issues them once `system.frontendUrl` is set, and a StartOS service has no single address — the admin has to enter the one their users reach Stirling PDF on. Sharing a stored file with a named user needs no such setting.
+9. **`/usr/share/tessdata` is not a drop-in directory for OCR languages.** Upstream's Docker instructions for adding a language by hand do not apply; languages are added from the **Advanced** settings instead — see [Volume and Data Layout](#volume-and-data-layout).
 
 ## Quick Reference for AI Consumers
 
@@ -191,6 +194,7 @@ file_models:
   - startos/store.json
 startos_managed_env_vars:
   - TINI_SUBREAPER
+  - JAVA_CUSTOM_OPTS
   - DISABLE_ADDITIONAL_FEATURES
   - SECURITY_ENABLELOGIN
   - SECURITY_INITIALLOGIN_USERNAME
