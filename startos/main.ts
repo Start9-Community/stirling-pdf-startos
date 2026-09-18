@@ -71,6 +71,9 @@ export const main = sdk.setupMain(async ({ effects }) => {
     exec: {
       command: ['tini', '--', '/scripts/init.sh'],
       env: {
+        // StartOS runs its own PID 1 in the subcontainer, so tini must
+        // register as a subreaper to reap the converters Stirling PDF spawns.
+        TINI_SUBREAPER: '1',
         DISABLE_ADDITIONAL_FEATURES: 'false',
         SECURITY_ENABLELOGIN: 'true',
         SECURITY_INITIALLOGIN_USERNAME: store.adminUsername,

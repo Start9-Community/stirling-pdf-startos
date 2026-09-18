@@ -24,11 +24,13 @@ Stirling PDF requires a sign-in, and this package generates the first account's 
 
 Signing in lands you on the tool list. Pick a tool, upload one or more PDFs, and download the result. Nothing you upload is retained after the operation finishes unless you save it to a pipeline.
 
-Adding more users, and choosing what each of them may do, is done from **Settings → Admin** inside Stirling PDF.
+Adding more users, and choosing what each of them may do, is done from **Settings → Admin** inside Stirling PDF. Stirling PDF's free tier covers up to five users, counting `admin`; going beyond that needs a paid plan from Stirling PDF.
 
 ### Inviting users by email
 
 Run **Configure SMTP** first: choose the SMTP settings already configured under **System → SMTP** in StartOS, or enter a server of your own. Stirling PDF restarts, and its user-management page gains an invite option that emails each new user a link to set their own password. The link points at the address you were signed in on when you sent it, so send invitations from the address your users will reach Stirling PDF on.
+
+An invited user's username is their full email address. That, not just the part before the `@`, is what they sign in with.
 
 ### OCR languages
 

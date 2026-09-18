@@ -42,6 +42,8 @@ The package runs the official Stirling PDF "standard" image unmodified — no Do
 
 One subcontainer runs, named `stirling-pdf`. Attach to it with `start-cli package attach stirling-pdf -n stirling-pdf`.
 
+StartOS runs its own init as PID 1 inside the subcontainer, so tini never is. The package sets `TINI_SUBREAPER` so that tini still adopts and reaps the converter processes Stirling PDF spawns — LibreOffice, OCRmyPDF, Ghostscript, Calibre — instead of leaving them as zombies.
+
 ## Volume and Data Layout
 
 Everything the package keeps lives on a single `main` volume, mounted into the container as five separate paths so that logs can be excluded from backups.
@@ -140,9 +142,9 @@ Stirling PDF is a Spring Boot application and its cold start is slow — a minut
 
 ## Backups and Restore
 
-The strategy is a straight volume copy: `main` is rsynced wholesale, with `logs` excluded.
+The strategy is a straight volume copy: `main` is rsynced wholesale, with `logs` and `configs/heap_dumps` excluded.
 
-That captures the account database, `settings.yml`, saved pipelines, OCR language data, and the generated credentials in `store.json`. Logs are excluded because they are large and rebuild themselves.
+That captures the account database, `settings.yml`, saved pipelines, OCR language data, and the generated credentials in `store.json`. Logs are excluded because they are large and rebuild themselves. `configs/heap_dumps/` is where upstream's JVM options write a heap dump if Stirling PDF runs out of memory; a dump can be several gigabytes and nothing reads it back, so it is diagnostic material that stays on the server.
 
 A restored instance is immediately usable and needs nothing re-entered — the account database comes back with it, so the credentials that worked before the backup still work.
 
@@ -166,6 +168,7 @@ volumes:
 file_models:
   - startos/store.json
 startos_managed_env_vars:
+  - TINI_SUBREAPER
   - DISABLE_ADDITIONAL_FEATURES
   - SECURITY_ENABLELOGIN
   - SECURITY_INITIALLOGIN_USERNAME
