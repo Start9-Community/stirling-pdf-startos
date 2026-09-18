@@ -1,4 +1,5 @@
 import { T } from '@start9labs/start-sdk'
+import { totalmem } from 'node:os'
 import { storeJson } from './fileModels/store.json'
 import { i18n } from './i18n'
 import { sdk } from './sdk'
@@ -28,6 +29,12 @@ export const main = sdk.setupMain(async ({ effects }) => {
       security: security.selection,
     }
   }
+
+  const maxHeapMiB = Math.min(
+    3 * 1024,
+    Math.floor(totalmem() / (2 * 1024 ** 2)),
+  )
+  const initialHeapMiB = Math.min(512, Math.floor(maxHeapMiB / 2))
 
   const subcontainer = sdk.SubContainer.of(
     effects,
@@ -110,10 +117,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
           // StartOS runs its own PID 1 in the subcontainer, so tini must
           // register as a subreaper to reap the converters Stirling PDF spawns.
           TINI_SUBREAPER: '1',
-          // StartOS sets no memory limit, so upstream's init would size the heap
-          // from the whole host: half its RAM. This is about what it picks for
-          // the 4 GB container its docs recommend for a small team.
-          JAVA_CUSTOM_OPTS: '-Xms512m -Xmx3g',
+          JAVA_CUSTOM_OPTS: `-Xms${initialHeapMiB}m -Xmx${maxHeapMiB}m`,
           DISABLE_ADDITIONAL_FEATURES: 'false',
           SECURITY_ENABLELOGIN: 'true',
           SECURITY_INITIALLOGIN_USERNAME: store.adminUsername,

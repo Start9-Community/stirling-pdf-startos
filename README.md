@@ -42,7 +42,7 @@ The package runs the official Stirling PDF "standard" image unmodified — no Do
 
 One subcontainer runs, named `stirling-pdf`. Attach to it with `start-cli package attach stirling-pdf -n stirling-pdf`. A second, `tessdata-seed`, is where a oneshot prepares the OCR language data before each start — see [Volume and Data Layout](#volume-and-data-layout). It stays up alongside the first, but nothing runs in it once that copy has finished.
 
-The Java heap is capped at 3 GB through `JAVA_CUSTOM_OPTS`. Upstream's `init.sh` sizes the heap from the memory limit of its container, and StartOS sets none, so it would otherwise read the whole host's RAM and allow half of it — 16 GB on a 32 GB server. 3 GB is about what that script picks inside the 4 GB container upstream recommends for up to ten users. A job that needs more fails with an out-of-memory error, which makes the JVM exit and the service restart; the dump it leaves is in `configs/heap_dumps/`, outside backups.
+The Java heap is capped through `JAVA_CUSTOM_OPTS` at the lower of 3 GB and half the memory visible to the service. This keeps the 3 GB ceiling on larger servers without giving the JVM more memory than a smaller server can support. A job that needs more fails with an out-of-memory error, which makes the JVM exit and the service restart; the dump it leaves is in `configs/heap_dumps/`, outside backups.
 
 StartOS runs its own init as PID 1 inside the subcontainer, so tini never is. The package sets `TINI_SUBREAPER` so that tini still adopts and reaps the converter processes Stirling PDF spawns — LibreOffice, OCRmyPDF, Ghostscript, Calibre — instead of leaving them as zombies.
 
