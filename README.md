@@ -40,7 +40,7 @@ The package runs the official Stirling PDF "standard" image unmodified — no Do
 | Architectures | `x86_64`, `aarch64`                                     |
 | Entrypoint    | Upstream's `tini -- /scripts/init.sh`                   |
 
-One subcontainer runs, named `stirling-pdf`. Attach to it with `start-cli package attach stirling-pdf -n stirling-pdf`.
+One subcontainer runs, named `stirling-pdf`. Attach to it with `start-cli package attach stirling-pdf -n stirling-pdf`. A second, `tessdata-seed`, is where a oneshot prepares the OCR language data before each start — see [Volume and Data Layout](#volume-and-data-layout). It stays up alongside the first, but nothing runs in it once that copy has finished.
 
 StartOS runs its own init as PID 1 inside the subcontainer, so tini never is. The package sets `TINI_SUBREAPER` so that tini still adopts and reaps the converter processes Stirling PDF spawns — LibreOffice, OCRmyPDF, Ghostscript, Calibre — instead of leaving them as zombies.
 
@@ -48,16 +48,20 @@ StartOS runs its own init as PID 1 inside the subcontainer, so tini never is. Th
 
 Everything the package keeps lives on a single `main` volume, mounted into the container as five separate paths so that logs can be excluded from backups.
 
-| Volume path          | Mount point           | Contents                                            |
-| -------------------- | --------------------- | --------------------------------------------------- |
-| `configs/`           | `/configs`            | Application settings and the account database       |
-| `tessdata/`          | `/usr/share/tessdata` | OCR language data                                   |
-| `pipeline/`          | `/pipeline`           | Saved pipeline definitions and watched-folder state |
-| `logs/`              | `/logs`               | Application logs                                    |
-| `customFiles/`       | `/customFiles`        | Replacement static assets and templates             |
-| `startos/store.json` | not mounted           | The generated administrator password                |
+| Volume path          | Mount point                           | Contents                                            |
+| -------------------- | ------------------------------------- | --------------------------------------------------- |
+| `configs/`           | `/configs`                            | Application settings and the account database       |
+| `tessdata/`          | `/usr/share/tesseract-ocr/5/tessdata` | OCR language data                                   |
+| `pipeline/`          | `/pipeline`                           | Saved pipeline definitions and watched-folder state |
+| `logs/`              | `/logs`                               | Application logs                                    |
+| `customFiles/`       | `/customFiles`                        | Replacement static assets and templates             |
+| `startos/store.json` | not mounted                           | The generated administrator password                |
 
 `startos/store.json` is deliberately outside every mount point, so Stirling PDF cannot read it.
+
+`tessdata/` is mounted over the one directory Tesseract reads — upstream's `init.sh` pins `TESSDATA_PREFIX` to it — rather than at `/usr/share/tessdata`, the drop-in path upstream documents for Docker. That is what lets a language downloaded from Stirling PDF's **Advanced** settings work at once and persist: in the stock image that directory is root-owned, so the download is refused, and it would not outlive the container anyway. Mounting over it hides the languages the image ships, so the `tessdata-seed` oneshot copies those into the volume before every start and gives the directory to the user Stirling PDF runs as. The copy only replaces a file when the image's is newer, so a language the image updates reaches existing installs, while a downloaded language, or a shipped one the user has replaced by hand, is left alone.
+
+If OCR stops offering a language that was downloaded, check the **Tessdata Directory** field in those settings: it must be empty. A path there sends both the language list and new downloads somewhere Tesseract does not read and the volume does not cover.
 
 ## File Models
 
@@ -155,6 +159,7 @@ A restored instance is immediately usable and needs nothing re-entered — the a
 3. **The Swagger UI and the OpenAPI document are disabled.** The REST API is unaffected; only the interactive documentation pages are gone.
 4. **Login cannot be disabled.** `SECURITY_ENABLELOGIN` is re-asserted on every launch, so the anonymous single-user mode upstream offers is not reachable.
 5. **A password changed inside Stirling PDF cannot be rotated from StartOS again** — see [Actions](#actions).
+6. **`/usr/share/tessdata` is not a drop-in directory for OCR languages.** Upstream's Docker instructions for adding a language by hand do not apply; languages are added from the **Advanced** settings instead — see [Volume and Data Layout](#volume-and-data-layout).
 
 ## Quick Reference for AI Consumers
 
@@ -162,9 +167,9 @@ A restored instance is immediately usable and needs nothing re-entered — the a
 package_id: stirling-pdf
 image: stirlingtools/stirling-pdf
 architectures: [x86_64, aarch64]
-subcontainers: [stirling-pdf]
+subcontainers: [stirling-pdf, tessdata-seed]
 volumes:
-  main: /configs, /usr/share/tessdata, /pipeline, /logs, /customFiles
+  main: /configs, /usr/share/tesseract-ocr/5/tessdata, /pipeline, /logs, /customFiles
 file_models:
   - startos/store.json
 startos_managed_env_vars:

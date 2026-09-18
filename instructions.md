@@ -34,7 +34,9 @@ An invited user's username is their full email address. That, not just the part 
 
 ### OCR languages
 
-OCR needs a language pack for each language you want to recognise. Only English ships with the image. Add more from **Settings → OCR** inside Stirling PDF; they are stored on the server and survive restarts, updates, and restores.
+OCR needs a language pack for each language you want to recognise. English, German, French, Portuguese and Simplified Chinese are included. To add more, sign in as `admin`, open **Settings**, go to the **Advanced** section, choose the languages under **Download additional tessdata languages**, and press **Download selected languages**. They are ready to use straight away, and they survive restarts, updates, and restores.
+
+Leave the **Tessdata Directory** field on that page empty. Pointing it somewhere else moves new languages to a place that is not kept.
 
 ### Actions
 
