@@ -1,6 +1,6 @@
 import { actions } from '../actions'
 import { restoreInit } from '../backups'
-import { setDependencies } from '../dependencies'
+import { dependencies } from '../dependencies'
 import { setInterfaces } from '../interfaces'
 import { versionGraph } from '../versions'
 import { createDirectories } from './createDirectories'
@@ -12,8 +12,8 @@ export const init = sdk.setupInit(
   versionGraph,
   createDirectories,
   setInterfaces,
-  setDependencies,
   actions,
+  dependencies,
   watchCredentials,
 )
 
