@@ -21,16 +21,3 @@ export const long = {
   fr_FR:
     "Stirling PDF réunit plus de cent opérations sur les PDF — fusion, découpe, conversion, OCR, signature, caviardage et traitements en plusieurs étapes — dans une seule interface web, sans jamais faire sortir un document de votre serveur. Ce paquet crée un compte administrateur à l'installation et conserve les réglages, les données linguistiques d'OCR et les traitements enregistrés sur son propre volume.",
 }
-
-export const alertInstall = {
-  en_US:
-    'Run the Set Admin Password action before starting Stirling PDF. The password it returns is shown once.',
-  es_ES:
-    'Ejecuta la acción Establecer la contraseña de administrador antes de iniciar Stirling PDF. La contraseña que devuelve se muestra una sola vez.',
-  de_DE:
-    'Führe die Aktion „Administratorpasswort festlegen“ aus, bevor du Stirling PDF startest. Das zurückgegebene Passwort wird nur einmal angezeigt.',
-  pl_PL:
-    'Uruchom akcję „Ustaw hasło administratora”, zanim wystartujesz Stirling PDF. Zwrócone hasło jest pokazywane tylko raz.',
-  fr_FR:
-    "Exécutez l'action « Définir le mot de passe d'administration » avant de démarrer Stirling PDF. Le mot de passe renvoyé n'est affiché qu'une fois.",
-}

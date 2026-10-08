@@ -18,7 +18,10 @@ Freshly scaffolded? Work the
 guide page, not a file in this repo — read it, don't copy it in.
 
 Keep `README.md` (technical reference for an AI support or administering agent) and
-`instructions.md` (end-user docs) in sync with your changes.
+`instructions.md` (end-user docs) in sync with your changes. This file restates neither:
+whoever changes the package has both, so it carries only what they don't — repo mechanics,
+a change that looks right and is not, where the next thing gets added, a naming trap, a
+build or test invocation particular to this repo.
 
 **Fix a defect you spot rather than reporting it** — you have the package open and the
 context to be sure. File **a GitHub issue on this repo** only when the call isn't yours to
@@ -31,6 +34,5 @@ verified, tried, and decided belongs in the commit message and the PR body.
 
 ## This repo
 
-- **`SECURITY_INITIALLOGIN_*` only creates an account while Stirling PDF's own user table is empty.** That is why `setAdminPassword` writes the store on a first set but calls the API on a rotation — a store-only rewrite would silently not reach the application.
-- **Rotation goes through `/api/v1/user/change-password`, not the admin endpoint.** `/api/v1/user/admin/changePasswordForUser` refuses to change the caller's own password, so the flow authenticates as the admin with the stored password and uses the self-service endpoint.
-- **The official image bundles proprietary components** under the terms in `NOTICE`, which is why `license` is a compound SPDX expression. Keep both in step with upstream's licensing when bumping the image.
+- **Never apply a password rotation by rewriting `store.json` alone** — `SECURITY_INITIALLOGIN_*` creates the account only while Stirling PDF's user table is empty, so the new password would not reach the application.
+- **Keep rotation on `/api/v1/user/change-password`** — the admin endpoint, `/api/v1/user/admin/changePasswordForUser`, refuses to change the caller's own password.
