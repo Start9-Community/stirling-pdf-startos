@@ -1,13 +1,13 @@
 import { IMPOSSIBLE, VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '2.14.3:4',
+  version: '2.14.3:5',
   releaseNotes: {
-    en_US: `StartOS package improvements.`,
-    es_ES: `Mejoras en el paquete de StartOS.`,
-    de_DE: `Verbesserungen am StartOS-Paket.`,
-    pl_PL: `Ulepszenia pakietu StartOS.`,
-    fr_FR: `Améliorations du paquet StartOS.`,
+    en_US: `Adds Forward Email to the SMTP provider presets.`,
+    es_ES: `Añade Forward Email a los proveedores SMTP predefinidos.`,
+    de_DE: `Fügt Forward Email zu den vordefinierten SMTP-Anbietern hinzu.`,
+    pl_PL: `Dodaje Forward Email do predefiniowanych dostawców SMTP.`,
+    fr_FR: `Ajoute Forward Email aux fournisseurs SMTP prédéfinis.`,
   },
   migrations: {
     up: async () => {},
