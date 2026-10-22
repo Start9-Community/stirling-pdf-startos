@@ -13,7 +13,11 @@ export const manifest = setupManifest({
   volumes: ['main'],
   images: {
     stirling: {
-      source: { dockerTag: 'stirlingtools/stirling-pdf:2.14.3' },
+      source: {
+        dockerBuild: {
+          buildArgs: { IMAGE: 'stirlingtools/stirling-pdf:2.14.3' },
+        },
+      },
       arch: ['x86_64', 'aarch64'],
     },
   },

@@ -32,11 +32,11 @@ Stirling PDF is a self-hosted toolbox for PDF documents: merging, splitting, for
 
 ## Image and Container Runtime
 
-The package runs the official Stirling PDF "standard" image unmodified — no Dockerfile of our own, and no patched entrypoint.
+The package runs the official Stirling PDF "standard" image with no patched entrypoint. The root `Dockerfile` adds one temporary layer that replaces its system CA bundle and removes the emSign roots from Java's `cacerts`; it comes out once upstream ships an image on a fixed store.
 
 | What          | Value                                                   |
 | ------------- | ------------------------------------------------------- |
-| Image source  | Upstream `stirlingtools/stirling-pdf`, standard variant |
+| Image source  | Upstream `stirlingtools/stirling-pdf`, standard variant, + root `Dockerfile` |
 | Architectures | `x86_64`, `aarch64`                                     |
 | Entrypoint    | Upstream's `tini -- /scripts/init.sh`                   |
 
@@ -185,7 +185,7 @@ A restored instance is immediately usable and needs nothing re-entered — the a
 
 ```yaml
 package_id: stirling-pdf
-image: stirlingtools/stirling-pdf
+image: stirlingtools/stirling-pdf + root Dockerfile (CA store layer)
 architectures: [x86_64, aarch64]
 subcontainers: [stirling-pdf, tessdata-seed]
 volumes:
